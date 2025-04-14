@@ -1,0 +1,3041 @@
+{
+	"info": {
+		"_postman_id": "217bc99a-0e2c-45a6-a67e-d2751e7dcdb4",
+		"name": "CityFibre nd1651 API's",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34524655"
+	},
+	"item": [
+		{
+			"name": "Query Product",
+			"item": [
+				{
+					"name": "queryFTTHProduct",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Fixed the missing closing parenthesis in the test script\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const xml2js = require('xml2js');\r",
+									"        const xmlString = pm.response.text();\r",
+									"        xml2js.parseString(xmlString, (err, result) => {\r",
+									"            if (err) {\r",
+									"                console.error(err);\r",
+									"            return; // Exit the test if parsing fails\r",
+									"        }\r",
+									"        const commonpath = result['soap:Envelope']['soap:Body'][0]['queryProductsForLocationResponse'][0]['queryProductsForLocationAccepted'][0]['locations'][0];\r",
+									"\r",
+									"        function validateProperties(object, properties) {\r",
+									"        properties.forEach(property => {\r",
+									"            pm.expect(object?.[property], `Missing '${property}' property`).to.exist;\r",
+									"        });\r",
+									"    }\r",
+									"    pm.test(\"locations\", function() {\r",
+									"               \r",
+									"        const locations = commonpath['location'][0];\r",
+									"        //console.log(locations)\r",
+									"\r",
+									"        pm.expect(locations).to.exist;\r",
+									"        pm.expect(locations.addressKey[0]).to.be.a('string');\r",
+									"\r",
+									"    });\r",
+									"    \r",
+									"\r",
+									"    pm.test(\"availableProduct\",function(){\r",
+									"         const availableProduct = commonpath['location'][0]['availableProducts'][0]['availableProduct'][0];\r",
+									"        //console.log(availableProduct);\r",
+									"        if (typeof availableProduct === 'object') {\r",
+									"        const expectedProperties = ['productName', 'appointmentRequired', 'cfh:nnis', 'cfh:nniDetails', 'cfh:availableInstallProducts', 'cfh:availableLineProfiles'];\r",
+									"        pm.expect(expectedProperties.every(property => availableProduct.hasOwnProperty(property)), \"Missing expected properties in availableProduct\").to.be.true;\r",
+									"               \r",
+									"    }\r",
+									"    else {\r",
+									"        pm.expect.fail(\"availableProduct has unexpected type\"); // Handle non-array structure\r",
+									"    }\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"Enni Details\",function(){\r",
+									"         const enniDetails = commonpath['location'][0]['availableProducts'][0]['availableProduct'][0]['cfh:nniDetails'][0]['cfh:nni'][0];\r",
+									"        //console.log(typeof(enniDetails));\r",
+									"        if (typeof enniDetails === 'object') {\r",
+									"        const expectedProperties = ['cfh:nniName', 'cfh:nniDescription', 'nniIdentifier', 'cfh:nniTagging', 'cfh:nniType', 'cfh:nniAccess', 'cfh:opportunityName'];\r",
+									"        pm.expect(expectedProperties.every(property => enniDetails.hasOwnProperty(property)), \"Missing expected properties in availableProduct\").to.be.true;    \r",
+									"\r",
+									"    }\r",
+									"    else {\r",
+									"        pm.expect.fail(\"availableProduct has unexpected type\"); // Handle non-array structure\r",
+									"    }\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"Available Install Products\", function () {\r",
+									"        const availableInstallProducts = commonpath['location'][0]['availableProducts'][0]['availableProduct'][0]['cfh:availableInstallProducts'][0];;\r",
+									"        pm.expect(availableInstallProducts).to.exist;\r",
+									"\r",
+									"        if (typeof availableInstallProducts === 'object') {\r",
+									"            const installProducts = availableInstallProducts?.['cfh:availableInstallProduct'][1];\r",
+									"            validateProperties(installProducts, ['name', 'cfh:availableInstallProductType']);\r",
+									"\r",
+									"            const installProductType = installProducts?.['cfh:availableInstallProductType'][0];\r",
+									"            pm.expect(installProductType?.['cfh:auxiliaryService'][0]).to.be.a('string');\r",
+									"\r",
+									"            const dependsOn = installProducts?.['cfh:dependsOn'][0];\r",
+									"            if (typeof dependsOn === 'object') {\r",
+									"                pm.expect(dependsOn?.['cfh:installProductRef'][0]).to.be.a('string');\r",
+									"            } else {\r",
+									"                pm.expect.fail(\"dependsOn has unexpected type\");\r",
+									"            }\r",
+									"        } else {\r",
+									"            pm.expect.fail(\"availableProduct has unexpected type\");\r",
+									"        }\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"Available line Profile\",function(){\r",
+									"         const availableLineProfiles = result['soap:Envelope']['soap:Body'][0]['queryProductsForLocationResponse'][0]['queryProductsForLocationAccepted'][0]['locations'][0]['location'][0]['availableProducts'][0]['availableProduct'][0]['cfh:availableLineProfiles'][0];\r",
+									"        \r",
+									"        if (typeof availableLineProfiles === 'object') {\r",
+									"            const availableLineProfile = availableLineProfiles?.['cfh:availableLineProfile'][0];\r",
+									"            \r",
+									"            if (availableLineProfile?.['cfh:lineProfile'] == 'object') {\r",
+									"                pm.expect(availableLineProfile?.['cfh:lineProfile'][0]).to.be.a('string');\r",
+									"            }\r",
+									"\r",
+									"        }\r",
+									"        else {\r",
+									"             pm.expect.fail(\"availableProduct has unexpected type\");\r",
+									"        }\r",
+									"    });\r",
+									"    \r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<soap:Envelope\r\n\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n\t<soap:Body>\r\n\t<queryProductsForLocationRequest xmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\" xmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n  <message>\r\n    <messageId>b68b2cf4-475e-11e1-a92e-fb2ff6467c99</messageId>\r\n    <correlationId>bac72cfa-475e-11e1-a92e-fb2ff6467c99</correlationId>\r\n    <sentAt>2012-01-20T18:30:43Z</sentAt>\r\n  </message>\r\n  <buyer>\r\n    <buyerIdentifier>{{username}}</buyerIdentifier>\r\n  </buyer>\r\n  <seller>\r\n    <sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n  </seller>\r\n  <location>\r\n    <addressKey>6100000009</addressKey>\r\n  </location>\r\n</queryProductsForLocationRequest>\r\n</soap:Body>\r\n</soap:Envelope>\r\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/queryProductsForLocation",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"queryProductsForLocation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "queryEthernetProduct",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Find product with variant FFN\", function () {\r",
+									"  let foundProducts = [];\r",
+									"\r",
+									"  const xml2js = require('xml2js');\r",
+									"  const xmlString = pm.response.text();\r",
+									"\r",
+									"  const parser = new xml2js.Parser();\r",
+									"  parser.parseString(xmlString, function (err, result) {\r",
+									"    if (err) {\r",
+									"      console.error(\"Error parsing XML:\", err);\r",
+									"      pm.test.fail(\"Error parsing XML response\");\r",
+									"      return;\r",
+									"    }\r",
+									"\r",
+									"    const availableProducts = result['soap:Envelope']['soap:Body'][0]['queryProductsForLocationResponse'][0]['queryProductsForLocationAccepted'][0]['locations'][0]['location'][0]['availableProducts'][0]['availableProduct'];\r",
+									"\r",
+									"    for (const product of availableProducts) {\r",
+									"      if (product.hasOwnProperty(\"cfh:variant\") && product['cfh:variant'][0] === \"FFN\") {\r",
+									"        foundProducts.push({ productName: product.productName[0] })\r",
+									"        \r",
+									"      }\r",
+									"      \r",
+									"    }\r",
+									"    pm.expect(foundProducts.length).to.be.greaterThan(0, \"No products with variant FFN found\");\r",
+									"\r",
+									"  });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<soap:Envelope\r\n\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n\t<soap:Body>\r\n\t<queryProductsForLocationRequest xmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\" xmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n  <message>\r\n    <messageId>b68b2cf4-475e-11e1-a92e-fb2ff6467c99</messageId>\r\n    <correlationId>bac72cfa-475e-11e1-a92e-fb2ff6467c99</correlationId>\r\n    <sentAt>2012-01-20T18:30:43Z</sentAt>\r\n  </message>\r\n  <buyer>\r\n    <buyerIdentifier>{{username}}</buyerIdentifier>\r\n  </buyer>\r\n  <seller>\r\n    <sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n  </seller>\r\n  <location>\r\n    <addressKey>6100000007</addressKey>\r\n  </location>\r\n</queryProductsForLocationRequest>\r\n</soap:Body>\r\n</soap:Envelope>\r\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/queryProductsForLocation",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"queryProductsForLocation"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Appointment Availability",
+			"item": [
+				{
+					"name": "Lead Time for Property Flag",
+					"item": [
+						{
+							"name": "WSODproperty",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"const xmlString = pm.response.text();\r",
+											"xml2js.parseString(xmlString, (err, result) => {\r",
+											"    if (err) {\r",
+											"        console.error(err);\r",
+											"        return; // Exit the test if parsing fails\r",
+											"    }\r",
+											"    \r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"    pm.test(\"appointmentSlots\", function() {\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"    });\r",
+											"\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0]; // Get the appointment date as a string\r",
+											"        console.log(\"Appointment Date:\", appointmentDate);\r",
+											"\r",
+											"        let now = moment(); // Get the current date\r",
+											"        let targetDate = moment(now).add(30, 'days'); // Calculate the date 30 days from now\r",
+											"\r",
+											"        // Function to check if a date is a bank holiday or weekend\r",
+											"        function isHoliday(date) {\r",
+											"            const dayOfWeek = date.isoWeekday(); \r",
+											"            const isWeekend = (dayOfWeek === 6 || dayOfWeek === 7);\r",
+											"            return isWeekend || bankHolidays.includes(date.format('YYYY-MM-DD')); // Check if it's a holiday or a weekend\r",
+											"        }\r",
+											"\r",
+											"        // Adjust targetDate if it falls on a holiday or weekend\r",
+											"        while (isHoliday(targetDate)) {\r",
+											"            targetDate.add(1, 'days'); // Move to the next day if it's a holiday or weekend\r",
+											"        }\r",
+											"\r",
+											"        let adjustedTargetDate = targetDate.format('YYYY-MM-DD'); // Format the final date\r",
+											"\r",
+											"        console.log(\"Adjusted Target Date (next working day if holiday or weekend):\", adjustedTargetDate);\r",
+											"\r",
+											"        // Compare the appointment date with the adjusted target date\r",
+											"        pm.test(\"First available appointment is 30 days from now or next working day\", function () {\r",
+											"            pm.expect(appointmentDate).to.eql(adjustedTargetDate);\r",
+											"        });\r",
+											"    });\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>701000311072</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "MODproperty",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"    let appointmentDate = appointmentSlots['appointmentDate'][0]; // Get the appointment date as a string\r",
+											"    console.log(\"Appointment Date:\", appointmentDate);\r",
+											"\r",
+											"    let now = moment(); // Get the current date\r",
+											"    let targetDate = moment(now).add(60, 'days').format('YYYY-MM-DD'); // Calculate the date 30 days from now\r",
+											"\r",
+											"    console.log(\"Target Date (30 days from now):\", targetDate);\r",
+											"\r",
+											"    // Compare the appointment date with the target date\r",
+											"    pm.test(\"First available appointment is exactly 60 days from now\", function () {\r",
+											"        pm.expect(appointmentDate).to.eql(targetDate);\r",
+											"    });\r",
+											"    });\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>701000311071</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "IN_EADproperty",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 20) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>701000311069</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "IN_PIAUGproperty",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 10) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>701000311068</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "SURproperty",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 10) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>10090357414</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "MDUproperty",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 10) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>25104498</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "DTLproperty",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 9) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>10093789534</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "WSDproperty",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 9) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>25046912</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Lead Time for Business Property",
+					"item": [
+						{
+							"name": "queryAppointmentBusinessRFS_1",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 20) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>6237273263</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>fttpl2blite</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "queryAppointmentBusinessRFS_1ReAppoint",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 10) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>6237273263</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>fttpl2blite</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n    <cfh:reappointment>1</cfh:reappointment>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "queryAppointmentBusinessRFS_2",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 10) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>701000311051</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>fttpl2blite</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "queryAppointmentBusinessRFS_2ReAppoint",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 2) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>6237273249</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>fttpl2blite</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n    <cfh:reappointment>1</cfh:reappointment>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Lead Time for General Property",
+					"item": [
+						{
+							"name": "queryAppointmentResidential",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 2) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>701000311059</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "queryAppointmentWLTOdifferentISP",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 10) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>5880000029</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n    <cfh:newOrderType>WLTO</cfh:newOrderType>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "queryAppointmentWLTOsameISP",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 2) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>5880000035</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n    <cfh:newOrderType>WLTO</cfh:newOrderType>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "queryAppointmentRegrade",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 2) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>5880000035</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n    <cfh:newOrderType>Regrade</cfh:newOrderType>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "queryAppointmentSwitch",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 10) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>5880000029</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>false</cfh:ispMigration>\r\n    <cfh:newOrderType>SWITCH</cfh:newOrderType>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "queryAppointmentISPmigration",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 10) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>5880000029</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>true</cfh:ispMigration>\r\n    <cfh:newOrderType></cfh:newOrderType>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "queryAppointmentISPmigrationReAppoint",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var moment = require('moment');\r",
+											"\r",
+											"let bankHolidays = JSON.parse(pm.environment.get(\"bankHolidays\")); // Retrieve bank holidays\r",
+											"\r",
+											"// Load response into object\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const xml2js = require('xml2js');\r",
+											"        const xmlString = pm.response.text();\r",
+											"        xml2js.parseString(xmlString, (err, result) => {\r",
+											"            if (err) {\r",
+											"                console.error(err);\r",
+											"            return; // Exit the test if parsing fails\r",
+											"        }\r",
+											"    const appointmentSlots = result['soap:Envelope']['soap:Body'][0]['queryAppointmentAvailabilityResponse'][0]['queryAppointmentAvailabilityAccepted'][0]['appointmentSlots'][0]['appointmentSlot'][0];\r",
+											"\r",
+											"pm.test(\"appointmentSlots\", function() {\r",
+											"\r",
+											"        pm.expect(appointmentSlots).to.exist;\r",
+											"        pm.expect(appointmentSlots.appointmentDate[0]).to.be.a('string');\r",
+											"        //console.log(appointmentSlots);\r",
+											"\r",
+											"    });\r",
+											"    pm.test(\"appointmentDate\", function() {\r",
+											"                \r",
+											"        let appointmentDate = appointmentSlots['appointmentDate'][0];\r",
+											"        console.log(appointmentDate);\r",
+											"        let now = moment(new Date());\r",
+											"        \r",
+											"        function isBankHoliday(date) {\r",
+											"                return bankHolidays.includes(date.format('YYYY-MM-DD'));\r",
+											"            }\r",
+											"\r",
+											"            function getSecondWorkingDay(startDate) {\r",
+											"                let currentDate = moment(startDate);\r",
+											"                let workingDaysCount = 0;\r",
+											"\r",
+											"                while (workingDaysCount < 2) {\r",
+											"                    currentDate.add(1, 'days'); // Move to the next day\r",
+											"                    // Check if current date is a working day (Monday to Friday) and not a bank holiday\r",
+											"                    if (currentDate.isoWeekday() < 6 && !isBankHoliday(currentDate)) {\r",
+											"                        workingDaysCount++;\r",
+											"                    }\r",
+											"                }\r",
+											"                return currentDate.format('YYYY-MM-DD'); // Return date in YYYY-MM-DD format\r",
+											"            }\r",
+											"\r",
+											"            let secondWorkingDay = getSecondWorkingDay(now);\r",
+											"            console.log(secondWorkingDay);\r",
+											"\r",
+											"            pm.test(\"First available appointment is the second working day\", function () {\r",
+											"                pm.expect(appointmentDate).to.eql(secondWorkingDay);\r",
+											"            });\r",
+											"        \r",
+											"        });\r",
+											"    });"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<soap:Body>\r\n<queryAppointmentAvailabilityRequest\r\n\txmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\"\r\n\txmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n\t<message>\r\n\t\t<messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r\n\t\t<correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r\n\t\t<sentAt>2022-07-18T18:49:51.588Z</sentAt>\r\n\t</message>\r\n\t<buyer>\r\n\t\t<buyerIdentifier>{{username}}</buyerIdentifier>\r\n\t</buyer>\r\n\t<seller>\r\n\t\t<sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n\t</seller>\r\n\t<addressKey>5880000029</addressKey>\r\n\t<appointmentsFrom>{{currentdate}}</appointmentsFrom>\r\n\t<appointmentType>\r\n\t\t<order/>\r\n\t</appointmentType>\r\n\t<cfh:productName>ftthl2r</cfh:productName>\r\n\t<cfh:ispMigration>true</cfh:ispMigration>\r\n    <cfh:reappointment>1</cfh:reappointment>\r\n    <cfh:newOrderType></cfh:newOrderType>\r\n</queryAppointmentAvailabilityRequest>\r\n</soap:Body>\r\n</soap:Envelope>",
+									"options": {
+										"raw": {
+											"language": "xml"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseurl}}/queryAppointmentAvailability",
+									"host": [
+										"{{baseurl}}"
+									],
+									"path": [
+										"queryAppointmentAvailability"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							"var moment = require('moment');\r",
+							"pm.sendRequest('https://www.gov.uk/bank-holidays.json', function (err, res) {\r",
+							"    if (err) {\r",
+							"        console.error(err);\r",
+							"        return;\r",
+							"    }\r",
+							"    const bankHolidayData = JSON.parse(res.text());\r",
+							"    const bankHolidays = bankHolidayData['england-and-wales'].events.map(event => moment(event.date).format('YYYY-MM-DD'));\r",
+							"    pm.environment.set(\"bankHolidays\", JSON.stringify(bankHolidays)); // Store as a string\r",
+							"});\r",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Appointment Reservation",
+			"item": [
+				{
+					"name": "reserveAppointment",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const xml2js = require('xml2js');\r",
+									"const moment = require('moment');\r",
+									"\r",
+									"// Parse the XML response\r",
+									"const responseXml = pm.response.text();\r",
+									"xml2js.parseString(responseXml, { explicitArray: false }, (err, result) => {\r",
+									"    if (err) {\r",
+									"        console.error('Error parsing XML:', err);\r",
+									"        return;\r",
+									"    }\r",
+									"\r",
+									"    // Extract the appointment object from the parsed response\r",
+									"    const appointment = result['soap:Envelope']['soap:Body'].reserveAppointmentResponse.reserveAppointmentAccepted.appointment;\r",
+									"\r",
+									"    // Define the elements to validate within the appointment object\r",
+									"    const elementsToValidate = [\r",
+									"        appointment.appointmentDate,\r",
+									"        appointment.appointmentStartTime,\r",
+									"        appointment.appointmentEndTime,\r",
+									"        appointment.appointmentReservationKey,\r",
+									"        appointment.appointmentReservationValidUntil\r",
+									"    ];\r",
+									"\r",
+									"    // Validate the presence of elements\r",
+									"    pm.test(\"Validate presence of essential appointment elements\", function () {\r",
+									"        elementsToValidate.forEach(element => {\r",
+									"            pm.expect(element).to.exist;\r",
+									"        });\r",
+									"    });\r",
+									"\r",
+									"    // Validate the date format (YYYY-MM-DD) for appointmentDate using moment\r",
+									"    pm.test(\"Validate appointmentDate format\", function () {\r",
+									"        const isValidDate = moment(appointment.appointmentDate, \"YYYY-MM-DD\", true).isValid();\r",
+									"        pm.expect(isValidDate).to.be.true;\r",
+									"    });\r",
+									"\r",
+									"    // Validate the date-time format (YYYY-MM-DDTHH:MM:SSZ) for appointmentReservationValidUntil using moment\r",
+									"    pm.test(\"Validate appointmentReservationValidUntil format\", function () {\r",
+									"        const isValidDateTime = moment(appointment.appointmentReservationValidUntil, \"YYYY-MM-DDTHH:mm:ssZ\", true).isValid();\r",
+									"        pm.expect(isValidDateTime).to.be.true;\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <soap:Body>\r\n        <reserveAppointmentRequest xmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\" xmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n            <message>\r\n                <messageId>b68b2cf4-475e-11e1-a92e-fb2ff6467c99</messageId>\r\n                <correlationId>bac72cfa-475e-11e1-a92e-fb2ff6467c99</correlationId>\r\n                <sentAt>2012-01-20T18:30:43Z</sentAt>\r\n            </message>\r\n            <buyer>\r\n                <buyerIdentifier>API_TEST</buyerIdentifier>\r\n            </buyer>\r\n            <seller>\r\n                <sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n            </seller>\r\n            <appointmentSlot>\r\n                <appointmentDate>{{appointmentDate}}</appointmentDate>\r\n                <appointmentStartTime>{{appointmentStartTime}}</appointmentStartTime>\r\n                <appointmentEndTime>{{appointmentEndTime}}</appointmentEndTime>\r\n            </appointmentSlot>\r\n            <appointmentType>\r\n                <order/>\r\n            </appointmentType>\r\n            <cfh:productName>ftthl2r</cfh:productName>\r\n            <cfh:addressKey>701000311059</cfh:addressKey>\r\n            <cfh:ispMigration>false</cfh:ispMigration>\r\n            <cfh:reappointment>false</cfh:reappointment>\r\n        </reserveAppointmentRequest>\r\n    </soap:Body>\r\n</soap:Envelope>\r\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/reserveAppointment",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"reserveAppointment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reserveAppointmentRejected",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const xml2js = require('xml2js');\r",
+									"const moment = require('moment');\r",
+									"\r",
+									"// Parse the XML response\r",
+									"const responseXml = pm.response.text();\r",
+									"xml2js.parseString(responseXml, { explicitArray: false }, (err, result) => {\r",
+									"    if (err) {\r",
+									"        console.error('Error parsing XML:', err);\r",
+									"        return;\r",
+									"    }\r",
+									"\r",
+									"    // Extract the rejection object from the parsed response\r",
+									"    const rejection = result['soap:Envelope']['soap:Body'].reserveAppointmentResponse.reserveAppointmentRejected;\r",
+									"    const message = result['soap:Envelope']['soap:Body'].reserveAppointmentResponse.message;\r",
+									"\r",
+									"    // Define the elements to validate within the rejection object\r",
+									"    const elementsToValidate = [\r",
+									"        rejection.errorOther.errorCode,\r",
+									"        rejection.errorOther.errorMessage\r",
+									"    ];\r",
+									"\r",
+									"    // Validate the presence of elements\r",
+									"    pm.test(\"Validate presence of essential rejection elements\", function () {\r",
+									"        elementsToValidate.forEach(element => {\r",
+									"            pm.expect(element).to.exist;\r",
+									"        });\r",
+									"    });\r",
+									"\r",
+									"    // Validate the error code is 509\r",
+									"    pm.test(\"Validate error code is 509\", function () {\r",
+									"        pm.expect(rejection.errorOther.errorCode).to.eql(\"509\");\r",
+									"    });\r",
+									"\r",
+									"    // Validate the error message is a string and display it\r",
+									"    pm.test(\"Validate error message is a string and display it\", function () {\r",
+									"        const errorMessage = rejection.errorOther.errorMessage;\r",
+									"        pm.expect(errorMessage).to.be.a('string');\r",
+									"        console.log(\"Error Message:\", errorMessage);\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <soap:Body>\r\n        <reserveAppointmentRequest xmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\" xmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n            <message>\r\n                <messageId>b68b2cf4-475e-11e1-a92e-fb2ff6467c99</messageId>\r\n                <correlationId>bac72cfa-475e-11e1-a92e-fb2ff6467c99</correlationId>\r\n                <sentAt>2012-01-20T18:30:43Z</sentAt>\r\n            </message>\r\n            <buyer>\r\n                <buyerIdentifier>API_TEST</buyerIdentifier>\r\n            </buyer>\r\n            <seller>\r\n                <sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n            </seller>\r\n            <appointmentSlot>\r\n                <appointmentDate>{{appointmentDate}}</appointmentDate>\r\n                <appointmentStartTime>{{appointmentStartTime}}</appointmentStartTime>\r\n                <appointmentEndTime>{{appointmentEndTime}}</appointmentEndTime>\r\n            </appointmentSlot>\r\n            <appointmentType>\r\n                <order/>\r\n            </appointmentType>\r\n            <cfh:productName>ftthl2r</cfh:productName>\r\n            <cfh:addressKey>701000311059</cfh:addressKey>\r\n            <cfh:ispMigration>true</cfh:ispMigration>\r\n            <cfh:reappointment>false</cfh:reappointment>\r\n        </reserveAppointmentRequest>\r\n    </soap:Body>\r\n</soap:Envelope>\r\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/reserveAppointment",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"reserveAppointment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reserveAppointmentValidationFailure",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const xml2js = require('xml2js');\r",
+									"\r",
+									"// Parse the XML response\r",
+									"const responseXml = pm.response.text();\r",
+									"xml2js.parseString(responseXml, { explicitArray: false }, (err, result) => {\r",
+									"    if (err) {\r",
+									"        console.error('Error parsing XML:', err);\r",
+									"        return;\r",
+									"    }\r",
+									"\r",
+									"    // Extract the rejection object from the parsed response\r",
+									"    const rejection = result['soap:Envelope']['soap:Body'].reserveAppointmentResponse.reserveAppointmentRejected;\r",
+									"    const message = result['soap:Envelope']['soap:Body'].reserveAppointmentResponse.message;\r",
+									"    const validationFailures = rejection.validationFailures.validationFailure;\r",
+									"\r",
+									"    // Validate the presence of elements\r",
+									"    pm.test(\"Validate presence of essential rejection elements\", function () {\r",
+									"        pm.expect(message.sentAt).to.exist;\r",
+									"        pm.expect(validationFailures).to.be.an('array').that.is.not.empty;\r",
+									"    });\r",
+									"\r",
+									"\r",
+									"    // Validate the validation failure fields and messages\r",
+									"    const expectedFailures = [\r",
+									"        { field: \"cfh:addressKey\", message: \"Empty\" },\r",
+									"        { field: \"cfh:productName\", message: \"Empty\" }\r",
+									"    ];\r",
+									"\r",
+									"    expectedFailures.forEach(expected => {\r",
+									"        pm.test(`Validate validation failure for ${expected.field}`, function () {\r",
+									"            const failure = validationFailures.find(f => f.validationFailureField === expected.field);\r",
+									"            pm.expect(failure).to.exist;\r",
+									"            pm.expect(failure.validationFailureMessage).to.eql(expected.message);\r",
+									"            console.log(`Validation Failure Message for ${expected.field}:`, failure.validationFailureMessage);\r",
+									"        });\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <soap:Body>\r\n        <reserveAppointmentRequest xmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\" xmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n            <message>\r\n                <messageId>b68b2cf4-475e-11e1-a92e-fb2ff6467c99</messageId>\r\n                <correlationId>bac72cfa-475e-11e1-a92e-fb2ff6467c99</correlationId>\r\n                <sentAt>2012-01-20T18:30:43Z</sentAt>\r\n            </message>\r\n            <buyer>\r\n                <buyerIdentifier>API_TEST</buyerIdentifier>\r\n            </buyer>\r\n            <seller>\r\n                <sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n            </seller>\r\n            <appointmentSlot>\r\n                <appointmentDate>{{appointmentDate}}</appointmentDate>\r\n                <appointmentStartTime>{{appointmentStartTime}}</appointmentStartTime>\r\n                <appointmentEndTime>{{appointmentEndTime}}</appointmentEndTime>\r\n            </appointmentSlot>\r\n            <appointmentType>\r\n                <order/>\r\n            </appointmentType>\r\n            <cfh:productName></cfh:productName>\r\n            <cfh:addressKey></cfh:addressKey>\r\n            <cfh:ispMigration>false</cfh:ispMigration>\r\n            <cfh:reappointment>false</cfh:reappointment>\r\n        </reserveAppointmentRequest>\r\n    </soap:Body>\r\n</soap:Envelope>\r\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/reserveAppointment",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"reserveAppointment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reserveAppointmentSchemaValidation",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const xml2js = require('xml2js');\r",
+									"\r",
+									"pm.test(\"Status code is 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is SOAP Fault\", function () {\r",
+									"    const responseText = pm.response.text();\r",
+									"    const parser = new xml2js.Parser();\r",
+									"\r",
+									"    parser.parseString(responseText, function (err, result) {\r",
+									"        if (err) {\r",
+									"            console.error(\"Error parsing XML:\", err);\r",
+									"            return;\r",
+									"        }\r",
+									"\r",
+									"        const fault = result['soap:Envelope']['soap:Body'][0]['soap:Fault'][0];\r",
+									"        const faultcode = fault.faultcode[0];\r",
+									"        const faultstring = fault.faultstring[0];\r",
+									"\r",
+									"        pm.expect(faultcode).to.eql(\"soap:Client\");\r",
+									"        pm.expect(faultstring).to.eql(\"Message failed schema validation\");\r",
+									"\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <soap:Body>\r\n        <reserveAppointmentRequest xmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\" xmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n            <message>\r\n                <messageId>b68b2cf4-475e-11e1-a92e-fb2ff6467c99</messageId>\r\n                <correlationId>bac72cfa-475e-11e1-a92e-fb2ff6467c99</correlationId>\r\n                <sentAt>2012-01-20T18:30:43Z</sentAt>\r\n            </message>\r\n            <buyer>\r\n                <buyerIdentifier>API_TEST</buyerIdentifier>\r\n            </buyer>\r\n            <seller>\r\n                <sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n            </seller>\r\n            <appointmentSlot>\r\n                <appointmentDate>{{appointmentDate}}</appointmentDate>\r\n                <appointmentStartTime>{{appointmentStartTime}}</appointmentStartTime>\r\n                <appointmentEndTime>{{appointmentEndTime}}</appointmentEndTime>\r\n            </appointmentSlot>\r\n            <appointmentType>\r\n                <orders/>\r\n            </appointmentType>\r\n            <cfh:productName>ftthl2r</cfh:productName>\r\n            <cfh:addressKey>701000311059</cfh:addressKey>\r\n            <cfh:ispMigration>false</cfh:ispMigration>\r\n            <cfh:reappointment>false</cfh:reappointment>\r\n        </reserveAppointmentRequest>\r\n    </soap:Body>\r\n</soap:Envelope>\r\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/reserveAppointment",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"reserveAppointment"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							"const xml2js = require('xml2js');\r",
+							"\r",
+							"const username = pm.environment.get(\"username\");\r",
+							"const password = pm.environment.get(\"password\");\r",
+							"const currentDate = pm.environment.get(\"currentdate\");\r",
+							"\r",
+							"if (username && password) {\r",
+							"    const encodedCredentials = btoa(`${username}:${password}`);\r",
+							"    pm.environment.set(\"encodedCredentials\", encodedCredentials);\r",
+							"\r",
+							"    const xmlBody = `\r",
+							"        <soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r",
+							"            <soap:Body>\r",
+							"                <queryAppointmentAvailabilityRequest xmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\" xmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r",
+							"                    <message>\r",
+							"                        <messageId>8036d41e-3c68-42c1-9ca5-521d5b03437e</messageId>\r",
+							"                        <correlationId>fdeb8c0a-a38d-43d8-89b3-83f17eeb7d69</correlationId>\r",
+							"                        <sentAt>2022-07-18T18:49:51.588Z</sentAt>\r",
+							"                    </message>\r",
+							"                    <buyer>\r",
+							"                        <buyerIdentifier>API_TEST</buyerIdentifier>\r",
+							"                    </buyer>\r",
+							"                    <seller>\r",
+							"                        <sellerIdentifier>CITYFIBRE</sellerIdentifier>\r",
+							"                    </seller>\r",
+							"                    <addressKey>701000311059</addressKey>\r",
+							"                    <appointmentsFrom>${currentDate}</appointmentsFrom>\r",
+							"                    <appointmentType>\r",
+							"                        <order/>\r",
+							"                    </appointmentType>\r",
+							"                    <cfh:productName>ftthl2r</cfh:productName>\r",
+							"                    <cfh:ispMigration>false</cfh:ispMigration>\r",
+							"                </queryAppointmentAvailabilityRequest>\r",
+							"            </soap:Body>\r",
+							"        </soap:Envelope>\r",
+							"    `;\r",
+							"\r",
+							"    pm.sendRequest({\r",
+							"        url: 'https://api-gw.cityfibre.com:41223/staging/api2/queryAppointmentAvailability',\r",
+							"        method: 'POST',\r",
+							"        header: {\r",
+							"            'Authorization': `Basic ${encodedCredentials}`,\r",
+							"            'Content-Type': 'application/xml'\r",
+							"        },\r",
+							"        body: {\r",
+							"            mode: 'raw',\r",
+							"            raw: xmlBody\r",
+							"        }\r",
+							"    }, function (err, response) {\r",
+							"        if (err) {\r",
+							"            console.error('Error making request:', err);\r",
+							"            return;\r",
+							"        }\r",
+							"\r",
+							"        const responseBody = response.text();\r",
+							"        xml2js.parseString(responseBody, { explicitArray: false }, function (err, result) {\r",
+							"            if (err) {\r",
+							"                console.error('Error parsing XML:', err);\r",
+							"                return;\r",
+							"            }\r",
+							"\r",
+							"            console.log(\"Parsed XML Response:\", result); // Debugging log\r",
+							"\r",
+							"            const appointmentDate = result?.['soap:Envelope']?.['soap:Body']?.['queryAppointmentAvailabilityResponse']?.['queryAppointmentAvailabilityAccepted']?.['appointmentSlots']?.['appointmentSlot']?.[0]?.['appointmentDate'];\r",
+							"            const appointmentStartTime = result?.['soap:Envelope']?.['soap:Body']?.['queryAppointmentAvailabilityResponse']?.['queryAppointmentAvailabilityAccepted']?.['appointmentSlots']?.['appointmentSlot']?.[0]?.['appointmentStartTime'];\r",
+							"            const appointmentEndTime = result?.['soap:Envelope']?.['soap:Body']?.['queryAppointmentAvailabilityResponse']?.['queryAppointmentAvailabilityAccepted']?.['appointmentSlots']?.['appointmentSlot']?.[0]?.['appointmentEndTime'];\r",
+							"\r",
+							"            if (appointmentDate && appointmentStartTime && appointmentEndTime) {\r",
+							"                pm.environment.set(\"appointmentDate\", appointmentDate);\r",
+							"                pm.environment.set(\"appointmentStartTime\", appointmentStartTime);\r",
+							"                pm.environment.set(\"appointmentEndTime\", appointmentEndTime);\r",
+							"            } else {\r",
+							"                console.error(\"Failed to extract appointment details from the response.\");\r",
+							"            }\r",
+							"        });\r",
+							"    });\r",
+							"} else {\r",
+							"    console.error(\"Username or password is not set in the environment variables.\");\r",
+							"}\r",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Address Search",
+			"item": [
+				{
+					"name": "Postcode",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const xml2js = require('xml2js');\r",
+									"const xmlString = pm.response.text();\r",
+									"\r",
+									"xml2js.parseString(xmlString, (err, result) => {\r",
+									"    if (err) {\r",
+									"        console.error(err);\r",
+									"        return;\r",
+									"    }\r",
+									"\r",
+									"    const locations = result['soap:Envelope']['soap:Body'][0]['queryAddressSearchResponse'][0]['queryAddressSearchAccepted'][0]['locations'][0]['location'][0];\r",
+									"        //console.log(locations);\r",
+									"\r",
+									"    pm.test(\"Location Fields\", () => {\r",
+									"    const fields = [\r",
+									"        'addressKey','cfh:bduk_subsidised', 'cfh:rfs_status', 'cfh:cabinet_area',\r",
+									"        'cfh:cabinet_release_date', 'cfh:cabinet_date_rating', 'cfh:property_classification',\r",
+									"        'cfh:drop_architecture_type_category', 'cfh:demand_point_type_category'\r",
+									"    ];\r",
+									"\r",
+									"    fields.forEach(field => pm.expect(locations[field][0]).to.be.a('string'));\r",
+									"    });\r",
+									"    pm.test(\"Address Fields\", () => {\r",
+									"    const address = locations.britishAddress[0];\r",
+									"    //console.log(address);\r",
+									"\r",
+									"    const addressFields = ['buildingNumber', 'thoroughfareName', 'dependentLocality', 'postTown', 'postcode'];\r",
+									"    addressFields.forEach(field => pm.expect(address[field][0]).to.be.a('string'));\r",
+									"    });\r",
+									"\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<soap:Envelope\r\n\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n\t<soap:Body>\r\n\t\t<queryAddressSearchRequest xmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\" xmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n  <message>\r\n    <messageId>b68b2cf4-475e-11e1-a92e-fb2ff6467c99</messageId>\r\n    <correlationId>bac72cfa-475e-11e1-a92e-fb2ff6467c99</correlationId>\r\n    <sentAt>2012-01-20T18:30:43Z</sentAt>\r\n  </message>\r\n  <buyer>\r\n    <buyerIdentifier>API_TEST</buyerIdentifier>\r\n  </buyer>\r\n  <seller>\r\n    <sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n  </seller>\r\n  <location>\r\n    <britishAddress>\r\n      <postcode>MK11 1EX</postcode>\r\n    </britishAddress>\r\n  </location>\r\n</queryAddressSearchRequest>\r\n\t</soap:Body>\r\n</soap:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/queryAddressSearch",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"queryAddressSearch"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Empty Postcode",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const xml2js = require('xml2js');\r",
+									"const xmlString = pm.response.text();\r",
+									"xml2js.parseString(xmlString, (err, result) => {\r",
+									"    if (err) {\r",
+									"        console.error(err);\r",
+									"    } else {\r",
+									"        const AddressSearch = result['soap:Envelope']['soap:Body'][0]['queryAddressSearchResponse'][0];\r",
+									"        pm.test(\"Validation Failure\", () => {\r",
+									"            pm.expect(AddressSearch).to.have.property('queryAddressSearchRejected');\r",
+									"            pm.expect(AddressSearch.queryAddressSearchRejected[0].validationFailures[0].validationFailure[0]).to.have.property('validationFailureField');\r",
+									"            pm.expect(AddressSearch.queryAddressSearchRejected[0].validationFailures[0].validationFailure[0].validationFailureField[0]).to.be.a('string');\r",
+									"            pm.expect(AddressSearch.queryAddressSearchRejected[0].validationFailures[0].validationFailure[0].validationFailureMessage[0]).to.be.a('string');\r",
+									"\r",
+									"        });\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<soap:Envelope\r\n\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n\t<soap:Body>\r\n\t\t<queryAddressSearchRequest xmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\" xmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n  <message>\r\n    <messageId>b68b2cf4-475e-11e1-a92e-fb2ff6467c99</messageId>\r\n    <correlationId>bac72cfa-475e-11e1-a92e-fb2ff6467c99</correlationId>\r\n    <sentAt>2012-01-20T18:30:43Z</sentAt>\r\n  </message>\r\n  <buyer>\r\n    <buyerIdentifier>API_TEST</buyerIdentifier>\r\n  </buyer>\r\n  <seller>\r\n    <sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n  </seller>\r\n  <location>\r\n    <britishAddress>\r\n      <postcode></postcode>\r\n    </britishAddress>\r\n  </location>\r\n</queryAddressSearchRequest>\r\n\t</soap:Body>\r\n</soap:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/queryAddressSearch",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"queryAddressSearch"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unauthorized",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"const xml2js = require('xml2js');\r",
+									"const xmlString = pm.response.text();\r",
+									"xml2js.parseString(xmlString, (err, result) => {\r",
+									"    if (err) {\r",
+									"        console.error(err);\r",
+									"    } else {\r",
+									"        const Fault = result['soap:Envelope']['soap:Body'][0]['soap:Fault'][0];\r",
+									"        pm.test(\"Unauthorized\", function () {\r",
+									"            pm.expect(Fault).to.exist;\r",
+									"            pm.expect(Fault.faultcode[0]).to.be.a('string');\r",
+									"            pm.expect(Fault.faultstring[0]).to.eql('Unauthorized');\r",
+									"        })\r",
+									"    };\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<soap:Envelope\r\n\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n\t<soap:Body>\r\n\t\t<queryAddressSearchRequest xmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\" xmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n  <message>\r\n    <messageId>b68b2cf4-475e-11e1-a92e-fb2ff6467c99</messageId>\r\n    <correlationId>bac72cfa-475e-11e1-a92e-fb2ff6467c99</correlationId>\r\n    <sentAt>2012-01-20T18:30:43Z</sentAt>\r\n  </message>\r\n  <buyer>\r\n    <buyerIdentifier>APT</buyerIdentifier>\r\n  </buyer>\r\n  <seller>\r\n    <sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n  </seller>\r\n  <location>\r\n    <britishAddress>\r\n      <postcode></postcode>\r\n    </britishAddress>\r\n  </location>\r\n</queryAddressSearchRequest>\r\n\t</soap:Body>\r\n</soap:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/queryAddressSearch",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"queryAddressSearch"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bad Request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"const xml2js = require('xml2js');\r",
+									"const xmlString = pm.response.text();\r",
+									"xml2js.parseString(xmlString, (err, result) => {\r",
+									"    if (err) {\r",
+									"        console.error(err);\r",
+									"    } else {\r",
+									"        const Fault = result['soap:Envelope']['soap:Body'][0]['soap:Fault'][0];\r",
+									"        pm.test(\"schema validation\", function () {\r",
+									"            pm.expect(Fault).to.exist;\r",
+									"            pm.expect(Fault.faultcode[0]).to.be.a('string');\r",
+									"            pm.expect(Fault.faultstring[0]).to.eql('Message failed schema validation');\r",
+									"        })\r",
+									"    };\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<soap:Envelope\r\n\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n\t<soap:Body>\r\n\t\t<queryAddressSearchRequest xmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\" xmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n  <message>\r\n    <messageId>b68b2cf4-475e-11e1-a92e-fb2ff6467c99</messageId>\r\n    <correlationId>bac72cfa-475e-11e1-a92e-fb2ff6467c99</correlationId>\r\n    <sentAt>2012-01-203434T18:30:43Z</sentAt>\r\n  </message>\r\n  <buyer>\r\n    <buyerIdentifier>API_TEST</buyerIdentifier>\r\n  </buyer>\r\n  <seller>\r\n    <sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n  </seller>\r\n  <location>\r\n    <britishAddress>\r\n      <postcode>MK11 1EX</postcode>\r\n    </britishAddress>\r\n  </location>\r\n</queryAddressSearchRequest>\r\n\t</soap:Body>\r\n</soap:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/queryAddressSearch",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"queryAddressSearch"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPRN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const xml2js = require('xml2js');\r",
+									"const xmlString = pm.response.text();\r",
+									"\r",
+									"xml2js.parseString(xmlString, (err, result) => {\r",
+									"    if (err) {\r",
+									"        console.error(err);\r",
+									"        return;\r",
+									"    }\r",
+									"\r",
+									"    const locations = result['soap:Envelope']['soap:Body'][0]['queryAddressSearchResponse'][0]['queryAddressSearchAccepted'][0]['locations'][0]['location'][0];\r",
+									"    console.log(locations);\r",
+									"\r",
+									"    pm.test(\"Location Fields\", () => {\r",
+									"        const locationFields = [\r",
+									"            'addressKey', 'cfh:bduk_subsidised', 'cfh:rfs_status', 'cfh:cabinet_area',\r",
+									"            'cfh:cabinet_release_date', 'cfh:cabinet_date_rating', 'cfh:property_classification',\r",
+									"            'cfh:drop_architecture_type_category', 'cfh:demand_point_type_category'\r",
+									"        ];\r",
+									"\r",
+									"        locationFields.forEach(field => {\r",
+									"            pm.expect(locations[field][0]).to.be.a('string', `Field ${field} is not a string`);\r",
+									"        });\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"Address Fields\", () => {\r",
+									"        const address = locations.britishAddress[0];\r",
+									"        console.log(address);\r",
+									"\r",
+									"        const addressFields = ['buildingNumber', 'thoroughfareName', 'dependentLocality', 'postTown', 'postcode'];\r",
+									"        addressFields.forEach(field => {\r",
+									"            pm.expect(address[field][0]).to.be.a('string', `Field ${field} is not a string`);\r",
+									"        });\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<soap:Envelope\r\n\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n\t<soap:Body>\r\n\t\t<queryAddressSearchRequest xmlns=\"http://www.niccstandards.org.uk/ala_1.0.xsd\" xmlns:cfh=\"http://www.cityfibre.com/ala/ext1\">\r\n  <message>\r\n    <messageId>b68b2cf4-475e-11e1-a92e-fb2ff6467c99</messageId>\r\n    <correlationId>bac72cfa-475e-11e1-a92e-fb2ff6467c99</correlationId>\r\n    <sentAt>2012-01-20T18:30:43Z</sentAt>\r\n  </message>\r\n  <buyer>\r\n    <buyerIdentifier>API_TEST</buyerIdentifier>\r\n  </buyer>\r\n  <seller>\r\n    <sellerIdentifier>CITYFIBRE</sellerIdentifier>\r\n  </seller>\r\n  <location>\r\n    <addressKey>8548585858</addressKey>\r\n  </location>\r\n</queryAddressSearchRequest>\r\n\t</soap:Body>\r\n</soap:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/queryAddressSearch",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"queryAddressSearch"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{password}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{username}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"var moment = require('moment');\r",
+					"\r",
+					"pm.environment.set('currentdate', moment().format((\"YYYY-MM-DD\")));"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
