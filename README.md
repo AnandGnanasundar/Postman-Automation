@@ -492,6 +492,8 @@ For questions or issues with this automation suite:
 - QA Team: qa-automation@cityfibre.com
 
 ---
+<img width="1400" height="1800" alt="test-report-screenshot" src="https://github.com/user-attachments/assets/c0de8dc4-3c32-46ce-b333-8508a2378aa6" />
+
 
 **Last Updated**: February 2025  
 **Collection Version**: v1.1  
