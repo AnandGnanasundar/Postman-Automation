@@ -478,18 +478,7 @@ Authorization: Bearer {{accessToken}}
 
 ## API Documentation
 
-- [TMF646 Appointment Management API Specification](https://www.tmforum.org/resources/specification/tmf646-appointment-api-rest-specification-r19-5-0/)
-- CityFibre Internal API Documentation: Contact API team for access
-
-## License
-
-Proprietary - CityFibre Limited
-
-## Contact
-
-For questions or issues with this automation suite:
-- API Team: api-team@cityfibre.com
-- QA Team: qa-automation@cityfibre.com
+- [TMF646 Appointment Management API Specification](https://www.tmforum.org/resources/specifications/tmf646-appointment-management-api-rest-specification-r19-0-0/)
 
 ---
 <img width="1400" height="1800" alt="test-report-screenshot" src="https://github.com/user-attachments/assets/c0de8dc4-3c32-46ce-b333-8508a2378aa6" />
