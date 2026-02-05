@@ -232,7 +232,7 @@ Given the following test data is available:
 @RunWith(Cucumber.class)
 @CucumberOptions(
     features = "src/test/resources/features",
-    glue = "com.cityfibre.stepdefinitions",
+    glue = "com.client.stepdefinitions",
     tags = "@lead-time and not @wip",
     plugin = {"pretty", "html:target/cucumber-reports"}
 )
@@ -446,9 +446,9 @@ When API changes occur:
 ## Support
 
 For questions or issues related to BDD feature files:
-- **API Team**: api-team@cityfibre.com
-- **QA Automation Team**: qa-automation@cityfibre.com
-- **Documentation**: https://docs.cityfibre.com/api/tmf646
+- **API Team**: api-team@client.com
+- **QA Automation Team**: qa-automation@client.com
+- **Documentation**: https://docs.client.com/api/tmf646
 
 ---
 
