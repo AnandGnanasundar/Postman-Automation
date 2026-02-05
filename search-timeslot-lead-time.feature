@@ -1,5 +1,5 @@
 Feature: TMF646 Appointment Management - SearchTimeSlot Lead Time Validation
-  As a CityFibre API consumer
+  As a Test API consumer
   I want to search for available appointment time slots
   So that I can identify valid installation dates based on customer type and order configuration
 
