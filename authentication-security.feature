@@ -1,5 +1,5 @@
 Feature: TMF646 Appointment Management - Authentication and Security
-  As a CityFibre API security administrator
+  As a Test API security administrator
   I want to ensure proper authentication and authorization controls
   So that only authorized API consumers can access appointment management services
 
@@ -163,7 +163,7 @@ Feature: TMF646 Appointment Management - Authentication and Security
   @environment-configuration @multi-environment
   Scenario: Support multiple environments (staging, production)
     Given I have separate Postman environments configured
-    And "CityFibre TMF - Staging New" environment is for staging
+    And "Test TMF - Staging New" environment is for staging
     When I switch to staging environment
     Then all environment variables should point to staging endpoints
     And "baseUrl" should reference staging API URL
