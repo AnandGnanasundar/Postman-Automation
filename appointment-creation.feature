@@ -1,5 +1,5 @@
 Feature: TMF646 Appointment Management - Appointment Creation and Reservation
-  As a CityFibre API consumer
+  As a Test API consumer
   I want to create and reserve appointment slots
   So that I can book installation appointments for customers
 
@@ -51,8 +51,8 @@ Feature: TMF646 Appointment Management - Appointment Creation and Reservation
     When I create an Appointment request
     And I include multiple external identifiers:
       | Owner      | Type      | ID          |
-      | CityFibre  | OrderId   | ORD-12345   |
-      | CityFibre  | ProductId | PROD-67890  |
+      | Test  | OrderId   | ORD-12345   |
+      | Test  | ProductId | PROD-67890  |
     And I submit the CreateAppointment request
     Then the API should return HTTP status code 201
     And the response should include all provided external identifiers
@@ -65,7 +65,7 @@ Feature: TMF646 Appointment Management - Appointment Creation and Reservation
     And I include related parties:
       | Role     | Name              | Type     | ReferredType |
       | Customer | John Smith        | PartyRef | Individual   |
-      | Agent    | CityFibre Agent   | PartyRef | Agent        |
+      | Agent    | Test Agent   | PartyRef | Agent        |
     And I submit the CreateAppointment request
     Then the API should return HTTP status code 201
     And the response should contain all related parties
